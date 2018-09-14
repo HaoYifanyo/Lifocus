@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>阅读批注页面</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+
+
+  <style type="text/css">
+    #p1{ position: absolute; left: 0;top: 0; display: none;}
+   </style>
+
+  <!--导入.html页面的内容，即选中后出现的批注选择框-->
+  <script>
+    function showPage(){
+    document.getElementById('a').src = "baidu.html"; //.html是要导入的页面
+}
+  </script>
+
+  <link rel="stylesheet" type="text/css" href="../css/08.css"/>
+
+  <script type="text/javascript" >
+   var currentShowPageIndex = 0;
+   var animateTimeout = null;
+   var isWheelAnimating = false;
+
+
+   var isWheelUp = function(event) {
+      event = event || window.event;
+      var up = true;
+      if(event.wheelDelta){//IE/Opera/Chrome               //wheeldelta为滚轮方向
+        up = event.wheelDelta  < 0 ? true : false;         //判断滚轮上下滚动的方向
+      }else{//Firefox
+        up = event.detail / 3 == 1 ? true : false;
+      }
+    return up;
+   }
+
+
+   var changeBar = function(prevIndex, index) {
+      var barUl = document.getElementById('barUl');
+      var barLiList = barUl.getElementsByTagName('li');
+      barLiList[prevIndex].className = "";
+      barLiList[index].className = "active"; 
+   }
+
+
+   var changePage = function(pageIndex) {
+      var showPageUl = document.getElementById('wheelUl');
+      changeBar(currentShowPageIndex, pageIndex);
+      currentShowPageIndex = pageIndex;
+      var left = -(currentShowPageIndex) * 1000;
+      showPageUl.style.marginLeft = left + "px";
+      return;
+   }
+
+
+   var animate = function(obj, mode, from, to){
+    if(animateTimeout) {
+     clearTimeout(animateTimeout);
+    }
+    if(mode == "left") {
+     if(from > to) {
+      from = from - 50;
+      obj.style.marginLeft = (from) + "px";
+      setTimeout(function(){
+       animate(obj, mode, from, to);
+      }, 30);
+     } else {
+        isWheelAnimating = false;
+       }
+     return;
+    } 
+    if(from < to) {
+     from = from + 50;
+     obj.style.marginLeft = (from) + "px";
+     setTimeout(function(){
+      animate(obj, mode, from, to);
+     }, 30);
+    } else {
+       isWheelAnimating = false;
+      }
+   }
+   var mouseWheel = function(event) { 
+    if(isWheelAnimating) {
+      return;
+    }
+    isWheelAnimating = true;
+    var wheelUp = isWheelUp(event);
+    var showPageUl = document.getElementById('wheelUl');
+    var showPageUlWidth = parseInt(showPageUl.offsetWidth);
+    var showPageLiList = showPageUl.getElementsByTagName('li');
+    var showPageLiListLength = showPageLiList.length;
+    var wheelWrapperLeft = parseInt(document.getElementById('wheelWrapper').offsetLeft);
+    if(wheelUp && currentShowPageIndex < showPageLiListLength - 1) {
+     changeBar(currentShowPageIndex, currentShowPageIndex + 1);
+     currentShowPageIndex ++;
+     var left = -(currentShowPageIndex) * 1000;
+     //animate(showPageUl, "right", -(currentShowPageIndex - 1) * 1000, -(currentShowPageIndex - 1) * 1000);
+     var from = -(currentShowPageIndex - 1) * 1000;
+     var to = -(currentShowPageIndex) * 1000;
+     animate(showPageUl, "left", from, to);
+     return;
+    }
+    if(!wheelUp && currentShowPageIndex > 0) {
+     changeBar(currentShowPageIndex, currentShowPageIndex - 1);
+     currentShowPageIndex --;
+     var from = -(currentShowPageIndex + 1) * 1000;
+     var to = -(currentShowPageIndex) * 1000;
+     animate(showPageUl, "right", from, to);
+     return;
+    } 
+    isWheelAnimating = false;
+   };
+   if(document.addEventListener){
+    document.addEventListener('DOMMouseScroll',function(event) { mouseWheel(event); },false);
+   }
+   document.onmousewheel = function(event) { mouseWheel(event); }
+   window.onload = function(){
+    var barUl = document.getElementById('barUl');
+    var barLiList = barUl.getElementsByTagName('li');
+    for(var i=0,length=barLiList.length; i<length; i++) {
+     (function(index){
+      barLiList[index].onclick = function(){
+       changePage(index);
+      };
+     })(i);
+    }
+   }
+  </script>
+  <style type="text/css" >
+   body { background:#e7dbbe; margin:0; }
+   ul { list-style:none; margin:0; padding:0; }
+   li { float:left;}
+   #wheelWrapper {
+    width:1000px; height:700px; margin:0 auto; 
+    position:fixed; left:50%; margin-left:-505px;
+    bottom:50px; overflow:hidden;
+   }
+   #wheelUl {
+    width:5050px; height:500px;
+   }
+   #barUl {
+    clear:both; margin:0 auto; width:550px;
+    margin-top:20px; line-height:25px;
+   }
+   #barUl>li {
+    width:100px; background:rgb(228, 222, 210);
+    height:25px; margin-right:10px;
+    border-radius:5px; text-align:center;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+   }
+   #barUl>li:hover {
+    background:rgb(228, 222, 210);
+   }
+   #barUl>li[class=active] {
+    background:rgb(228, 222, 210);
+   }
+   #wheelUl>li { width:1000px; }
+   .wheel {
+    width:800px; height:700px; background:rgb(228, 222, 210);
+    border-radius:10px;
+    -webkit-border-radius:10px;
+    -moz-border-radius:10px;
+    margin:0 auto;
+    line-height:300px;
+    font-size:20px;
+    text-align:center;
+   }
+   .radius {
+    border-radius:3px;
+    -webkit-border-radius:3px;
+    -moz-border-radius:3px;
+   }
+   h1 { text-align:center; color:#fff; }
+  </style>
+
+
+<script type="text/javascript">
+    window.onload=function(){
+      function selectText(){
+        if(document.selection){
+        //兼容ie
+          return document.selection.createRange().text;
+        } else{
+        //标准的获取方法
+          return window.getSelection().toString();
+        }
+      }
+      var oTxt = document.getElementById('txt');
+      var op = document.getElementById('select-text');
+        var oaddline = document.getElementById("add-underline");
+ 
+      oTxt.onmouseup = function(ev){
+        var ev =ev||window.event;
+        var top = ev.clientY;
+        var left = ev.clientX;
+        if(selectText().length>0){
+          console.log(selectText())
+          setTimeout(function(){
+            op.style.display = 'block';
+            op.style.left =left-250 + 'px';
+            op.style.top = top+'px';
+          },10)
+        } else{
+          op.style.display = 'none';
+        }
+      };
+      oTxt.onclick =function(ev){
+        var ev =ev||window.event;
+        ev.cancelBubble = true;
+      }
+      document.onclick = function(){
+        op.style.display = 'none';
+      };
+      //点击分享的实现
+      // op.onclick = function(){
+      //   window.location.href='http://service.weibo.com/share/share.php?url=http%3A%2F%2Flocalhost%3A63342%2Fjs2%2Fpicscroll.html&type=icon&language=zh_cn&searchPic=true&style=simple'+selectText()+window.location.href;
+      // }
+    }
+
+
+
+
+  oaddline.onclick=function() {
+
+    alert("Hello World!");
+  // if (e._isLogin()) {
+  //   var n = a(this).hasClass("color-item") ? a(this).data("color") : e.State.curNoteColor;
+  //   e._setDefaultUnderlineColor(n), o.fire("v:add-note", {
+  //     data: {
+  //       noteKey: t.attr("data-note-key") || "",
+  //       noteColor: n,
+  //       changeCustomstr: !1
+  //     }
+  //   })
+  // }
+}
+  </script>
+</head>
+
+ <body id="body">
+
+   <!--点击批注按钮后，出现的文本框-->
+   <div id="note-modify-pop" class="reader-pop has-arrow-pop note-modify-pop select-a-t" style="left: 732px; top: 254px; display: none;">
+     <div class="abox" style="left: 30px;">
+       <div class="a1"></div>
+       <div class="a2"></div>
+     </div>
+     <div class="content-wrap">
+       <p class="mb10">
+         <textarea class="customstr-input" maxlength="500" style="height:71px;"></textarea>
+       </p>
+       <p class="act-btn">
+         <a href="###" class="pop-btn confirm-btn mr10">确定</a>
+         <a href="###" class="pop-btn cancel-btn">取消</a>
+       </p>
+     </div>
+   </div>
+
+  <div id="select-text" class="reader-pop has-arrow-pop reader-select-pop select-a-t" 
+  style="display:none;" data-note-key="">
+   <div class="abox" style="left: 30px;">
+    <div class="a1"></div>
+    <div class="a2">
+
+    </div>
+    </div>
+    <ul class="select-area">
+      <li><a id="copy-text-btn" class="select-item copy-text" href="###" style="z-index: 9000;">复制</a>
+      </li>
+      <li style="display: inline-block;">
+      <a id="add-underline" class="select-item add-underline" href="###">划词</a>
+      </li>
+      <li style="display: none;">
+      <a class="select-item cancel-underline" href="###">清除划线</a>
+      </li>
+      <li>
+      <a class="select-item modify-note" href="###" target="_blank">笔记</a>
+      </li>
+      <li><a class="select-item share" href="###">分享</a>
+      </li>
+    </ul>
+
+    <!--选择颜色的区域-->
+    <ul class="color-area">
+      <li>
+      <a class="color-item color0 add-underline" data-color="0" href="###">
+       <span class="color-icon"></span>
+      </a>
+      </li>
+      <li>
+        <a class="color-item color1 add-underline" data-color="1" href="###">
+          <span class="color-icon"></span>
+        </a>
+      </li>
+      <li>
+        <a class="color-item color2 add-underline" data-color="2" href="###">
+          <span class="color-icon"></span>
+        </a>
+      </li><li><a class="color-item color3 add-underline" data-color="3" href="###"><span class="color-icon"></span></a></li><li><a class="color-item color4 add-underline" data-color="4" href="###"><span class="color-icon"></span></a></li></ul>
+      </div>
+
+
+  
+ 
+
+
+  <div id="wrapper" >
+   <div id="wheelWrapper" >
+    <ul id="wheelUl" >
+
+  
+     <li >
+      <div class="wheel" id="txt">
+       1_page1安居房是安慰UV镜哪位不in打本是安慰UI腹黑福哈尽快发货收款方可接受的VB和诉苦是就涣发大号VB软件
+      </div>
+     </li>
+     <li >
+      <div class="wheel" id="txt">
+       2_page2哈哈哈哈哈哈哈哈哈哈哈或或或或或或或哈哈哈哈哈哈哈或或或或或或或或或或或或或哈哈哈哈哈哈哈哈哈哈哈
+      </div>
+     </li>
+     <li >
+      <div class="wheel">
+       3_page3哈哈哈哈哈哈哈哈哈哈哈哈哈或或或或或或或哈哈哈哈哈哈哈或或或或或或或或哈哈哈哈哈哈哈
+      </div>
+     </li>
+     <li >
+      <div class="wheel">
+       4_page4哈哈哈哈哈哈哈哈哈哈哈哈哈哈或或或或或或或或或或哈哈哈哈哈哈哈或或或或或或或或哈哈哈哈哈哈哈哈
+      </div>
+     </li>
+     <li >
+      <div class="wheel">
+       5_page5哈哈哈哈哈哈哈或或或或或或或哈哈哈哈哈哈哈或或或或或或或哈哈哈哈哈哈哈或或或或或或或哈哈哈哈哈哈
+      </div>
+     </li>
+    </ul>
+    <ul id="barUl">
+     <li class="active">
+      1
+     </li>
+     <li>
+      2
+     </li>
+     <li>
+      3
+     </li>
+     <li>
+      4
+     </li>
+     <li>
+      5
+     </li>
+    </ul>
+   </div>
+  </div>
+ </body>
+</html>
